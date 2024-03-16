@@ -7,6 +7,10 @@ pub struct Tx {
 
     #[serde(rename = "client")]
     pub client: Client,
+
+    #[serde(rename = "tx")]
+    pub id: TxId,
+
 }
 
 #[derive(Deserialize, Clone, Copy)]
@@ -29,3 +33,9 @@ pub enum TxType {
 
 #[derive(Deserialize,Serialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Client(u16);
+
+#[derive(Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct TxId(u32);
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Default)]
+pub struct Amount(i32);
