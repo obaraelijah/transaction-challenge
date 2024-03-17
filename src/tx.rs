@@ -97,3 +97,19 @@ impl Into<f32> for Amount {
         self.0 as f32 / AMOUNT_SHIFT_ACCURACY
     }
 }
+
+impl ops::Add for Amount {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Amount(self.0 + other.0)
+    }
+}
+
+impl ops::Sub for Amount {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Amount(self.0 - other.0)
+    }
+}
