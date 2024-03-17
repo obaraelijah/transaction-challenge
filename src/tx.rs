@@ -1,4 +1,5 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::ops;
 
 const AMOUNT_SHIFT_ACCURACY: f32 = 10000.0;
 
@@ -67,3 +68,32 @@ impl Into<u32> for TxId {
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Default)]
 pub struct Amount(i32);
+
+impl Amount {
+    fn deserialize<'de, D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let amount: Option<f32> = Deserialize::deserialize(deserializer)?;
+        Ok(Amount::from(amount.unwrap_or(0.0)))
+    }
+
+    pub fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_f32(self.clone().into())
+    }
+}
+
+impl From<f32> for Amount {
+    fn from(amount: f32) -> Self {
+        Amount((amount * AMOUNT_SHIFT_ACCURACY) as i32)
+    }
+}
+
+impl Into<f32> for Amount {
+    fn into(self) -> f32 {
+        self.0 as f32 / AMOUNT_SHIFT_ACCURACY
+    }
+}
