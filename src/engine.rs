@@ -82,4 +82,48 @@ impl Engine {
         account.total = account.total - amount;
         Ok(())
     }
+
+    fn dispute(&mut self, client: Client, _amount: Amount, tx_id: TxId) -> Result<()> {
+        let amount = *self
+            .tx_amounts
+            .get(&tx_id)
+            .ok_or(anyhow!("tx not found, tx: {:?}", tx_id))?;
+
+        let account = self.account(client)?;
+        if account.available < amount {
+            account.locked = true;
+            return Err(anyhow!(
+                "insufficient funds for dispute, locking account, tx: {:?}",
+                tx_id
+            ));
+        }
+
+        account.available = account.available - amount;
+        account.held = account.held + amount;
+        Ok(())
+    }
+
+    fn resolve(&mut self, client: Client, _amount: Amount, tx_id: TxId) -> Result<()> {
+        if !self.disputed.contains(&tx_id) {
+            return Ok(());
+        }
+
+        let amount = *self
+            .tx_amounts
+            .get(&tx_id)
+            .ok_or(anyhow!("tx not found, tx: {:?}", tx_id))?;
+
+        let account = self.account(client)?;
+        if account.held < amount {
+            return Err(anyhow!(
+                "insufficient held funds, this shouldn't happen, tx: {:?}",
+                tx_id
+            ));
+        }
+
+        account.available = account.available + amount;
+        account.held = account.held - amount;
+        self.disputed.remove(&tx_id);
+        Ok(())
+    }
 }
