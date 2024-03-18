@@ -1,6 +1,5 @@
 ---
 source: src/main.rs
-assertion_line: 95
 expression: readable
 ---
 client,available,held,total,locked
