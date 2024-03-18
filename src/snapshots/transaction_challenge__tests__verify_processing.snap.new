@@ -1,0 +1,12 @@
+---
+source: src/main.rs
+assertion_line: 95
+expression: readable
+---
+client,available,held,total,locked
+client,available,held,total,locked
+1,2.0,0.0,2.0,false
+2,2.0,0.0,2.0,false
+3,0.0,5.0,5.0,false
+4,0.0,10.5562,10.5562,false
+5,0.0,11.76,11.76,false

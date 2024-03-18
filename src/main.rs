@@ -59,3 +59,39 @@ fn main() -> Result<()> {
     writer.flush()?;
     Ok(())
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::stream_records_from_reader;
+    use super::Engine;
+    use std::fs::File;
+    use std::io::Cursor;
+    use std::io::Write;
+    use super::write_cols;
+
+    #[test]
+    fn verify_processing() {
+        let mut file = File::open("sample.csv").unwrap();
+        let tx_stream = stream_records_from_reader(&mut file);
+        let mut data = Vec::new();
+        let mut wtr = Cursor::new(&mut data);
+        let mut writer = csv::Writer::from_writer(&mut wtr as &mut dyn Write);
+        let mut engine = Engine::new();
+
+        for tx in tx_stream {
+            let _ = engine.apply(tx.unwrap());
+        }
+
+        write_cols(&mut writer).unwrap();
+        for account in engine.accounts() {
+            writer.serialize(account).unwrap();
+        }
+
+        writer.flush().unwrap();
+        drop(writer);
+        
+        let readable = String::from_utf8(data).unwrap();
+        insta::assert_snapshot!(readable);
+    }
+}
